@@ -1,0 +1,14 @@
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.next/
+dist/
+build/
+.env
+.env.local
+.ipynb_checkpoints/
+.DS_Store
+# data is regenerable — record HOW in CLAUDE.md before ignoring it
+data/
