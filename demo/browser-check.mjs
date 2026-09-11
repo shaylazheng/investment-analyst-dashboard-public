@@ -22,6 +22,7 @@ try{
  await nav('Management');await page.getByRole('button',{name:/Demo Alex Morgan/}).click();await settle();assert.match(await page.locator('main').first().innerText(),/BEFORE THIS ROLE/);
  await nav('Industry');assert.equal(await page.locator('.ind-sharebar').count(),1);
  await nav('Competitors');await page.getByRole('button',{name:'+ top 5',exact:true}).click();await settle();assert.match(await page.locator('main').first().innerText(),/5 of 5 loaded/);
+ await page.getByRole('button',{name:/After insider buys/}).click();await settle();assert.ok(await page.locator('.cmp-record tbody tr').count()>0);
  await page.getByRole('button',{name:/Insights/}).first().click();await settle();assert.match(await page.locator('.insight-body').innerText(),/Generated/);
  await nav('Valuation');const before=await page.locator('.bk-flag').innerText();await page.locator('input[type=range]').first().fill('0.12');await settle();assert.notEqual(await page.locator('.bk-flag').innerText(),before);
  await nav('Risks & Catalysts');assert.match(await page.locator('main').first().innerText(),/Consensus — generated example/i);

@@ -102,7 +102,7 @@ export function payload(route,query={},body={},method='GET') {
  if(route==='/peers/notes/index')return {tickers:[...notes.keys()]};
  if(route==='/peers/notes'){if(method==='POST')notes.set(t,body);return {ticker:t,exists:true,data:notes.get(t)||{thesis:'Illustrative technology demand scenario.',sample:true,risks:['Price competition'],falsify:['Two quarters of declining generated revenue']},demo:true};}
  if(route==='/peers/news')return {items:[{title:`Synthetic ${t} scenario: demand expands`,source:'Demo News',date,link:'./demo-data.html',tickers:[t]}]};
- if(route==='/peers/insider'||route==='/peers/insider/record')return {tickers:{},days:90,years:5,demo:true};
+ if(route==='/peers/insider'||route==='/peers/insider/record')return peerFlow(query,route.endsWith('/record'));
  if(route==='/valuation')return valuation(t,query);
  if(route==='/valuation/peers'){const rows=companies.map(c=>{const v=valuation(c.ticker,{});return {ticker:c.ticker,name:c.name,evToFcf:v.evToFcf,fcfMargin:v.inputs.margin};});const others=rows.filter(c=>c.ticker!==t).map(c=>c.evToFcf).sort((a,b)=>a-b),median=(others[Math.floor((others.length-1)/2)]+others[Math.floor(others.length/2)])/2,self=valuation(t,{}).evToFcf;return {ticker:t,rows,self,median,n:others.length,premium:self/median-1};}
  if(route==='/management')return management(t);
@@ -122,7 +122,7 @@ export function payload(route,query={},body={},method='GET') {
  if(route==='/insider/screener')return screen(query);
  if(route==='/insider/prices')return prices(query);
  if(route==='/insider/stats')return {demo:true,filings:150,transactions:150,latest:stamp};
- if(route==='/insider/vocab')return {roles:['CEO','CFO'],sic_sectors:[{code:'',label:'All sectors'},{code:'tech',label:'Synthetic technology'}],screens:[],screen_groups:[]};
+ if(route==='/insider/vocab')return {roles:['CEO','CFO'],date_presets:[{value:'',label:'Any time'},{value:'7',label:'Last 7 days'},{value:'30',label:'Last 30 days'},{value:'90',label:'Last 90 days'}],age_presets:[{value:'',label:'Any age'},{value:'24',label:'Last 24 hours'},{value:'168',label:'Last 7 days'}],sic_sectors:[{code:'',label:'All sectors'},{code:'tech',label:'Synthetic technology'}],screens:[],screen_groups:[]};
  if(['/insight','/ask','/claude','/brief','/concept'].includes(route))return {content:`Generated ${t} scenario: compare cash-flow margins, peer multiples and growth assumptions. Increasing the discount rate raises the growth needed to justify the same price.`,answer:'Illustrative explanation generated locally.',demo:true};
  if(route==='/fred')return series(query.series); // Local synthetic series only; no FRED adapter.
  return basePayload(route,query);
@@ -153,6 +153,7 @@ export function screen(q={}) {
  }
  for(const [key,field,after] of [['filed_after','filing_datetime',true],['filed_before','filing_datetime',false],['traded_after','trans_date',true],['traded_before','trans_date',false]])if(has(key))rows=rows.filter(r=>after?r[field].slice(0,10)>=q[key]:r[field].slice(0,10)<=q[key]);
  const now=Date.parse(stamp),age=r=>(now-Date.parse(r.filing_datetime))/3600000;
+ if(has('age_preset'))rows=rows.filter(r=>age(r)<=Number(q.age_preset));
  for(const key of ['filed_within_days','traded_within_days'])if(has(key))rows=rows.filter(r=>age(r)<=Number(q[key])*24);
  if(has('age_max_hours'))rows=rows.filter(r=>age(r)<=Number(q.age_max_hours));if(has('age_min_hours'))rows=rows.filter(r=>age(r)>=Number(q.age_min_hours));
  const aggregates=new Map();for(const r of rows){const a=aggregates.get(r.ticker)||{filings:0,insiders:new Set(),officers:new Set(),value:0};a.filings++;a.insiders.add(r.owner_name);if(r.is_officer)a.officers.add(r.owner_name);a.value+=r.value;aggregates.set(r.ticker,a);}
@@ -180,4 +181,12 @@ export function correlations(csv=companies.map(c=>c.ticker).join(',')){
  const tickers=csv.split(','),s=prices({tickers:csv}).series;const returns=t=>s[t].close.slice(-181).map((v,i,vs)=>i?v/vs[i-1]-1:0).slice(1);
  const pearson=(a,b)=>{const ma=a.reduce((s,v)=>s+v,0)/a.length,mb=b.reduce((s,v)=>s+v,0)/b.length;return a.reduce((s,v,i)=>s+(v-ma)*(b[i]-mb),0)/Math.sqrt(a.reduce((s,v)=>s+(v-ma)**2,0)*b.reduce((s,v)=>s+(v-mb)**2,0));};
  const matrix=Object.fromEntries(tickers.map(a=>[a,Object.fromEntries(tickers.map(b=>[b,a===b?1:pearson(returns(a),returns(b))]))])); return {ok:true,demo:true,tickers,matrix,average:Object.fromEntries(tickers.map(a=>[a,tickers.length>1?tickers.filter(b=>b!==a).reduce((s,b)=>s+matrix[a][b],0)/(tickers.length-1):null])),n:180,window:180,spine:{from:s[tickers[0]].dates.at(-180),to:date}};
+}
+
+function peerFlow(q,record){
+ const tickers={};for(const t of (q.tickers||'NVDA').split(',')){
+ const rows=screen({ticker:t,limit:1000,filed_within_days:q.days||90}).rows,b=rows.filter(r=>r.trans_code==='P'),s=rows.filter(r=>r.trans_code==='S');
+ if(record){const price=prices({tickers:t}).series[t];const horizons=Object.fromEntries([['r1w',5],['r1m',21],['r6m',126]].map(([key,n])=>{const rs=b.map(r=>price.dates.indexOf(r.trans_date)).filter(i=>i>=0&&i+n<price.close.length).map(i=>100*(price.close[i+n]/price.close[i]-1)).sort((a,b)=>a-b);return [key,rs.length?{n:rs.length,mean:rs.reduce((s,v)=>s+v,0)/rs.length,median:(rs[Math.floor((rs.length-1)/2)]+rs[Math.floor(rs.length/2)])/2,hit:rs.filter(v=>v>0).length/rs.length}:{n:0}];}));tickers[t]={purchases:b.length,first:b.at(-1)?.trans_date,last:b[0]?.trans_date,horizons};}
+ else tickers[t]={buys:b.length,sells:s.length,other:rows.length-b.length-s.length,distinctFilings:rows.length,netValue:b.reduce((n,r)=>n+r.value,0)-s.reduce((n,r)=>n+r.value,0),ceoCfoBuys:b.filter(r=>r.is_ceo||r.is_cfo).length,ceoCfoSells:s.filter(r=>r.is_ceo||r.is_cfo).length,officerBuys:b.filter(r=>r.is_officer).length,plannedSells:0,medianFilingDelayDays:0};
+ }return {demo:true,tickers,days:Number(q.days)||90,years:Number(q.years)||5};
 }
