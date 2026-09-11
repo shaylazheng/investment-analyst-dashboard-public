@@ -1,0 +1,850 @@
+/* Surface styles shared across sections.
+ *
+ * This file was book.css. Despite the name it never belonged to one surface:
+ * it carries .vl-* (Valuation), .cr-* (Credit), .src-* (the shell's own
+ * SourceInspector) and .tk-* (the shell's TickerLinks) alongside the .bk-*
+ * layout primitives that Credit, Valuation, Summary and Report all build on.
+ * Book, Risk and Thesis were deleted; their .rk- and .th- blocks are kept
+ * rather than pruned, because dropping a rule that something still uses fails
+ * the way CLAUDE.md warns about -- it builds fine and lays out wrong.
+ *
+ * Declares NO :root block and redefines NO tokens -- bloom.css stays the
+ * authority on the palette, the same contract insider.css and competitors.css
+ * honour. Every colour here is a var().
+ */
+
+.bk-surface {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gutter);
+  padding: var(--gutter);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.bk-surface::-webkit-scrollbar { width: 9px; }
+.bk-surface::-webkit-scrollbar-track { background: transparent; }
+.bk-surface::-webkit-scrollbar-thumb {
+  background: var(--hairline); border-radius: 999px; border: 2px solid var(--bg);
+}
+
+.bk-band { display: flex; gap: var(--gutter); flex: 0 0 auto; }
+.bk-band > .pnl { flex: 1 1 auto; min-width: 0; }
+.bk-band-2 > .pnl { flex: 1 1 50%; }
+
+/* ---- flags -------------------------------------------------------------- */
+
+.bk-flag {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border-left: 2px solid var(--accent);
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.bk-flag strong { color: var(--ink); font-weight: 600; }
+.bk-flag code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; }
+.bk-flag ul { margin: 5px 0 0; padding-left: 18px; }
+.bk-flag.is-bad { border-left-color: var(--down); }
+
+/* ---- the header strip --------------------------------------------------- */
+
+.bk-strip {
+  flex: 0 0 auto;
+  display: grid;
+  /* auto-fit rather than a fixed count: the strip carries six tiles on some
+     surfaces and eight on others, and a hardcoded column count either wraps
+     badly or leaves a gap. */
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: var(--gutter);
+}
+
+.bk-tile {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 12px;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+.bk-tile-label {
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+/* Tabular figures so the six tiles' digits line up column to column. */
+.bk-tile-value {
+  font-size: 19px; font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bk-tile-sub { font-size: 10.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+/* ---- tables ------------------------------------------------------------- */
+
+.bk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.bk-table th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 6px 9px;
+  text-align: right;
+  font-size: 9.5px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--panel);
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+.bk-table td {
+  padding: 5px 9px;
+  text-align: right;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--hairline-soft);
+  white-space: nowrap;
+}
+.bk-table tr:last-child td { border-bottom: 0; }
+.bk-table tbody tr:hover td { background: var(--surf-hi); }
+.bk-l { text-align: left !important; }
+.bk-dim { color: var(--ink-faint); }
+.bk-tiny { font-size: 10.5px; }
+.bk-tick { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 600; color: var(--ink); }
+.bk-lotmark {
+  margin-left: 4px; padding: 0 3px;
+  font-size: 9.5px; font-weight: 500;
+  color: var(--ink-faint); background: var(--band);
+  border-radius: var(--radius-sm);
+}
+/* The name column is the only one allowed to give up its width. */
+.bk-wide { white-space: normal; min-width: 0; }
+.bk-weight { width: 160px; }
+
+/* A closed lot is history, not exposure — recessive, but still legible. */
+.bk-table tr.is-closed td { opacity: 0.62; }
+
+/* Polarity. The hue is never the only cue: every figure it tints carries an
+   explicit + or − from signed()/pct(), which is what makes ΔE ~7.6 deutan
+   between --up and --down legal here. */
+.bk-table td.up, .bk-tile-value.up { color: var(--up); }
+.bk-table td.down, .bk-tile-value.down { color: var(--down); }
+
+/* ---- weight bars -------------------------------------------------------- */
+
+/* One measure across categories, so ONE hue. A categorical palette over an
+   unbounded position list would have to generate hues, and generated hues are
+   exactly what failed CVD separation on the Competitors surface. */
+.bk-bar { display: flex; align-items: center; gap: 7px; }
+.bk-bar-track {
+  flex: 1 1 auto; min-width: 0;
+  height: 7px;
+  background: var(--hairline-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bk-bar-fill {
+  height: 100%;
+  background: var(--sw-a);
+  /* 4px rounded data-end, anchored square to the baseline. */
+  border-radius: 0 4px 4px 0;
+  min-width: 2px;
+}
+.bk-bar-label {
+  flex: 0 0 auto;
+  font-size: 10.5px; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- footnotes and empty states ----------------------------------------- */
+
+.bk-foot {
+  margin: 0; padding: 7px 10px;
+  font-size: 10.5px; line-height: 1.5; color: var(--ink-fainter);
+  border-top: 1px solid var(--hairline-soft);
+}
+.bk-empty { padding: 14px; font-size: 12px; line-height: 1.6; color: var(--ink-soft); }
+.bk-empty p { margin: 0 0 8px; }
+.bk-empty code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--ink); }
+.bk-empty pre {
+  margin: 0 0 8px; padding: 10px;
+  background: var(--band); border-radius: var(--radius);
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px;
+  color: var(--ink-soft); overflow-x: auto;
+}
+.bk-empty-note { color: var(--ink-fainter); }
+
+/* ============================================================ *
+ *  RISK
+ * ============================================================ */
+
+/* The diverging pair for the correlation matrix. Declared here rather than in
+   bloom.css because only this surface diverges — and deliberately warm/cool,
+   NOT the green/red used for P&L: on a platform where green already means
+   "up", a green correlation cell reads as good news rather than as +1.
+   Validated at delta-E 24.7 (light) / 26.8 (dark) under protanopia. */
+:root { --corr-pos: #eb6834; --corr-neg: #2a78d6; }
+:root[data-theme="dark"] { --corr-pos: #d95926; --corr-neg: #3987e5; }
+
+.rk-controls {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 4px;
+  padding: 0 2px;
+}
+.rk-controls-label {
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-faint); margin-right: 4px;
+}
+.rk-controls-note { margin-left: 10px; font-size: 10.5px; color: var(--ink-fainter); }
+
+.rk-matrix-wrap { padding: 2px 0 0; overflow-x: auto; }
+.rk-matrix th, .rk-matrix td { text-align: center; padding: 5px 8px; }
+.rk-matrix th:first-child, .rk-matrix td:first-child { text-align: left; }
+.rk-cell { font-variant-numeric: tabular-nums; }
+/* The diagonal is structurally 1 and carries no information; keeping it plain
+   stops it dominating the field as the most saturated cell on the grid. */
+.rk-cell.is-diag { color: var(--ink-fainter); background: transparent; }
+
+.rk-legend {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px 0;
+  font-size: 10.5px; color: var(--ink-faint);
+}
+.rk-key {
+  width: 13px; height: 9px; border-radius: 2px; display: inline-block;
+  margin-left: 8px;
+}
+.rk-key:first-child { margin-left: 0; }
+.rk-key-mid { background: var(--hairline); }
+
+/* ---- the path chart ---- */
+
+.rk-chart { padding: 8px 10px 0; }
+.rk-chart-legend {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  font-size: 10.5px; color: var(--ink-faint); margin-bottom: 4px;
+}
+.rk-lg { display: inline-flex; align-items: center; gap: 5px; }
+.rk-lg-note { color: var(--ink-fainter); }
+.rk-swatch { width: 14px; height: 2px; border-radius: 1px; display: inline-block; }
+.rk-sw-book { background: var(--accent); }
+.rk-sw-mkt { background: var(--ink-fainter); }
+
+.rk-svg { width: 100%; height: auto; display: block; }
+.rk-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.rk-line-book { stroke: var(--accent); }
+.rk-line-mkt { stroke: var(--ink-fainter); }
+.rk-base { stroke: var(--chart-grid); stroke-width: 1; stroke-dasharray: 2 3; }
+.rk-end { font-size: 10px; font-weight: 600; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.rk-end-book { fill: var(--accent); }
+.rk-end-mkt { fill: var(--ink-faint); }
+
+/* ============================================================ *
+ *  THESIS
+ * ============================================================ */
+
+.th-strip { grid-template-columns: repeat(5, 1fr); }
+
+.th-cards { display: flex; flex-direction: column; gap: 9px; }
+
+.th-card {
+  padding: 10px 12px;
+  background: var(--surf-lo);
+  border-radius: var(--radius);
+  border-left: 2px solid var(--hairline);
+}
+/* A held position with nothing written is the row this surface exists to
+   surface, so it is the one that gets the accent edge. */
+.th-card.is-missing { border-left-color: var(--down); }
+
+.th-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.th-asof { margin-left: auto; font-size: 10.5px; color: var(--ink-fainter); }
+.th-more { padding: 2px 8px; font-size: 10.5px; }
+
+.th-badge {
+  font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: var(--radius-sm);
+  background: var(--band); color: var(--ink-faint);
+}
+.th-badge.is-warn { color: var(--down); background: color-mix(in srgb, var(--down) 12%, transparent); }
+.th-badge.is-due { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+.th-conv { display: inline-flex; align-items: center; gap: 3px; }
+.th-pip {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--hairline); display: inline-block;
+}
+.th-pip.is-on { background: var(--accent); }
+.th-conv-n { font-size: 10px; color: var(--ink-fainter); margin-left: 3px; }
+
+.th-thesis { margin: 0 0 8px; font-size: 12px; line-height: 1.55; color: var(--ink-soft); }
+.th-invite { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--ink-faint); }
+.th-invite code, .th-path { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; }
+.th-path { margin: 8px 0 0; color: var(--ink-fainter); }
+
+.th-block { margin-bottom: 7px; }
+.th-label {
+  display: block; margin-bottom: 3px;
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-fainter);
+}
+.th-body { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--ink-soft); }
+.th-list { margin: 0; padding-left: 17px; font-size: 11.5px; line-height: 1.55; color: var(--ink-soft); }
+.th-list li { margin-bottom: 2px; }
+.th-list li.is-past { color: var(--ink-fainter); }
+.th-due .th-date { color: var(--accent); }
+.th-date { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; color: var(--ink-fainter); }
+.th-targets { display: flex; gap: 14px; flex-wrap: wrap; }
+.th-targets b { color: var(--ink); font-weight: 600; }
+
+.th-template {
+  margin: 0; padding: 10px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px;
+  line-height: 1.5; color: var(--ink-faint);
+  background: var(--band); overflow-x: auto;
+}
+
+/* ============================================================ *
+ *  CREDIT & RATES
+ * ============================================================ */
+
+.bk-band-3 > .pnl { flex: 1 1 33%; }
+
+.cr-chart { padding: 8px 10px 0; }
+.cr-pad { padding: 10px 10px 0; }
+
+/* The curve's four snapshots are ONE measure at four dates, so they are one
+   hue at four weights — not four categorical colours. Recency reads as ink
+   weight, which is the encoding the eye already expects from a fan chart. */
+.cr-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cr-now { stroke: var(--accent); }
+.cr-h1  { stroke: var(--ink-faint); stroke-width: 1.5; }
+.cr-h2  { stroke: var(--ink-fainter); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.cr-h3  { stroke: var(--ink-fainter); stroke-width: 1.5; stroke-dasharray: 1 3; }
+
+/* The legend swatches reuse the line classes, so a stroke change cannot leave
+   the key disagreeing with the chart. */
+i.rk-swatch.cr-now  { background: var(--accent); }
+i.rk-swatch.cr-h1   { background: var(--ink-faint); }
+i.rk-swatch.cr-h2   { background: var(--ink-fainter); }
+i.rk-swatch.cr-h3   { background: var(--ink-fainter); opacity: 0.55; }
+
+.cr-dot { fill: var(--accent); }
+.cr-axis {
+  font-size: 9px; fill: var(--ink-fainter);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+.cr-axis-x { text-anchor: middle; }
+
+.cr-spark { width: 100%; height: 54px; display: block; }
+
+.cr-note {
+  flex: 0 0 auto; margin: 0; padding: 2px 4px 4px;
+  font-size: 10.5px; line-height: 1.55; color: var(--ink-fainter);
+}
+.cr-note code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+/* ============================================================ *
+ *  VALUATION
+ * ============================================================ */
+
+.vl-bar { gap: 6px; }
+.vl-input {
+  width: 92px; padding: 3px 8px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px;
+  font-weight: 600; text-transform: uppercase;
+  color: var(--ink); background: var(--panel-2);
+  border: 1px solid var(--hairline); border-radius: var(--radius-sm);
+}
+.vl-input:focus { outline: none; border-color: var(--accent); }
+
+.vl-sliders { display: flex; flex-direction: column; gap: 13px; }
+.vl-slider { display: flex; flex-direction: column; gap: 3px; }
+.vl-slider-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.vl-slider-label {
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.vl-slider-value {
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.vl-slider input[type="range"] { width: 100%; accent-color: var(--accent); }
+.vl-slider-hint { font-size: 10.5px; line-height: 1.45; color: var(--ink-fainter); }
+
+/* SEQUENTIAL, not diverging: one measure low to high, so one hue at varying
+   strength. Implied growth has no natural midpoint the way a correlation does,
+   and a two-ended ramp would invent a "neutral" growth rate that does not
+   exist. Every cell prints its number, so the tint is the second cue. */
+.vl-grid td, .vl-grid th { text-align: center; }
+.vl-grid td:first-child, .vl-grid th:first-child { text-align: left; }
+.vl-cell { font-variant-numeric: tabular-nums; }
+
+/* ============================================================ *
+ *  EARNINGS
+ * ============================================================ */
+
+.er-strip { grid-template-columns: repeat(5, 1fr); }
+
+.er-stats {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 11.5px; color: var(--ink-faint);
+}
+.er-stats b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.er-stats b.up { color: var(--up); }
+.er-stats b.down { color: var(--down); }
+
+/* One signed bar per past report, oldest left. Centred on a shared midline so
+   direction reads without a legend; the exact figure is in the tooltip and in
+   the expanded table, so the bar only has to carry shape. */
+.er-moves { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; }
+.er-move { width: 15px; height: 20px; display: inline-block; }
+.er-move-mid { position: relative; display: block; width: 100%; height: 100%; }
+.er-move-mid::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  border-top: 1px solid var(--hairline);
+}
+.er-move-bar {
+  position: absolute; top: 25%; height: 50%;
+  border-radius: 1px; min-width: 2px;
+}
+.er-move-bar.is-up { background: var(--up); }
+.er-move-bar.is-down { background: var(--down); }
+
+.er-table { margin-top: 4px; }
+
+/* ============================================================ *
+ *  CROSS-SURFACE LINKS
+ * ============================================================ */
+
+/* Recessive until hovered. These sit on every row that names a company, so at
+   full strength they would out-shout the numbers they sit beside — the row is
+   the content, the links are an affordance. */
+.tk-links {
+  display: inline-flex; align-items: center; gap: 1px;
+  margin-left: 6px; vertical-align: baseline;
+}
+.tk-link {
+  appearance: none; cursor: pointer;
+  border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink-fainter);
+  font-size: 11px; line-height: 1;
+  padding: 2px 3px;
+  transition: color .12s ease, background-color .12s ease;
+}
+.tk-link:hover { color: var(--accent); background: var(--panel-2); }
+.tk-link:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+
+/* Faint but ALWAYS present, brightening on row hover. Hiding them until hover
+   was the first attempt and it was wrong twice over: an affordance nobody can
+   see is one nobody discovers, and a control that only exists on hover cannot
+   be verified by a screenshot, which is the only visual check available here. */
+.bk-table .tk-links { opacity: 0.45; transition: opacity .12s ease; }
+.bk-table tr:hover .tk-links,
+.bk-table .tk-links:focus-within { opacity: 1; }
+
+/* ---- thesis: targets against spot --------------------------------------- */
+
+/* Promoted out of the expanded section. A target's whole meaning is its
+   distance from the price, so the distance is the headline, not a detail
+   behind a "more" button. */
+.th-targets-row {
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--hairline-soft);
+  font-size: 11.5px; font-variant-numeric: tabular-nums;
+}
+.th-spot { font-size: 13px; font-weight: 600; color: var(--ink); }
+.th-tgt { display: inline-flex; align-items: baseline; gap: 5px; }
+.th-tgt-label {
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-fainter);
+}
+.th-tgt b { color: var(--ink-soft); font-weight: 600; }
+.th-tgt-d { font-size: 10.5px; }
+.th-tgt-d.up { color: var(--up); }
+.th-tgt-d.down { color: var(--down); }
+
+/* Where the price sits inside its own case. "Through bull" is the one worth
+   catching: the thesis worked and nobody wrote down what happens next. */
+.th-standing {
+  margin-left: auto;
+  font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: var(--radius-sm);
+  background: var(--band); color: var(--ink-faint);
+}
+.th-standing.is-through-bull { color: var(--up); background: color-mix(in srgb, var(--up) 14%, transparent); }
+.th-standing.is-through-bear { color: var(--down); background: color-mix(in srgb, var(--down) 14%, transparent); }
+
+.th-answer { color: var(--ink-faint); font-style: italic; }
+
+/* Fewer than four estimates is not a consensus; mark it beside the number
+   rather than in a footnote nobody reads at the moment they need it. */
+.er-thin { color: var(--down); }
+
+/* The risk-share bar column. Narrower than the weight bars on Positions: it
+   sits beside two numeric columns rather than carrying the row alone. */
+.rk-share { width: 130px; }
+
+/* The fade toggle sits among the sliders and has to read as one of them. */
+.vl-toggle { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.vl-toggle input { margin-top: 2px; accent-color: var(--accent); }
+.vl-toggle b { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); }
+.vl-toggle .vl-slider-hint { display: block; margin-top: 2px; }
+
+/* The briefing row. The button sits above the surface it explains and the
+   panel appears beneath it, so a request and its answer stay adjacent —
+   Markets and Competitors both put the panel in a fixed column, which these
+   surfaces have no room for. */
+.bk-insight { flex: 0 0 auto; }
+.bk-insight .pnl { margin-top: var(--gutter); }
+.bk-insight > .insight-btn { margin-left: 2px; }
+
+/* ============================================================ *
+ *  SOURCE INSPECTOR
+ * ============================================================ */
+
+/* Collapsed by default: provenance is a question you ask occasionally and
+   urgently, not continuously, and an always-open panel would push the actual
+   content down on every surface. */
+.src-panel { flex: 0 0 auto; margin: 2px 0; }
+
+.src-toggle {
+  appearance: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: transparent;
+  padding: 4px 6px; border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.src-toggle:hover { color: var(--ink); background: var(--panel-2); }
+.src-caret { font-size: 8px; }
+.src-count {
+  padding: 0 5px; border-radius: 999px;
+  background: var(--band); color: var(--ink-fainter);
+  font-size: 9px; letter-spacing: 0;
+}
+
+.src-body {
+  margin-top: 4px; padding: 10px 12px;
+  background: var(--panel); border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+.src-list { list-style: none; margin: 0; padding: 0; }
+.src-item {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+  font-size: 11.5px; line-height: 1.5;
+}
+.src-item:last-child { border-bottom: 0; }
+
+/* The kind is a fixed-width gutter so the labels align into a column and the
+   four categories read as categories rather than as prose. */
+.src-kind {
+  flex: 0 0 96px;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-fainter);
+}
+.src-item.is-filing .src-kind { color: var(--accent); }
+.src-main { min-width: 0; }
+.src-main a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+.src-main a:hover { color: var(--accent); }
+.src-label { color: var(--ink-soft); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; }
+.src-detail { display: block; color: var(--ink-fainter); font-size: 10.5px; }
+
+.src-foot {
+  margin: 8px 0 0; padding-top: 7px;
+  border-top: 1px solid var(--hairline-soft);
+  font-size: 10.5px; line-height: 1.5; color: var(--ink-fainter);
+}
+
+/* ============================================================================
+   VALUATION — FIVE LOOKS  ·  data-vl-v="1".."5" on .vl-surface
+   ==========================================================================
+
+   Scoped to .vl-surface throughout, never to .bk-surface: Book, Risk and Thesis
+   share that class and none of them asked to be restyled.
+
+   The surface has one job — say what growth the price is paying for — and
+   currently buries the answer as tile one of six. These five disagree about how
+   to fix that:
+
+     1 Verdict   put the answer at size and drop the tiles to a caption strip
+     2 Console   pin the assumptions, because the sliders ARE the surface
+     3 Ladder    draw the scenarios against the price instead of tabling them
+     4 Compare   two columns: what the price says, what the company has done
+     5 Report    stop being a dashboard; be the written note it turns into
+
+   Child order of .vl-main, which look 3 and 4 place by position. The rail is
+   NOT among them — it is a sibling column of .vl-main:
+
+     1 frame + look strip   2 flag   3 verdict bars   4 briefing   5 tiles
+     6 sensitivity   7 multiples | scenarios   8 note
+
+   Assumptions and Sources moved to the rail, so the old 6/7/8/9 numbering is
+   gone. Renumber both blocks if a band is added.
+   ========================================================================= */
+
+.vl-surface .lk-switch { margin-left: auto; }
+
+/* The two-bar comparison is new information; only the look built around it
+   shows it, and the rest keep the tile strip they were designed with. */
+.vl-verdict { display: none; }
+.vl-surface[data-vl-v="1"] .vl-verdict { display: block; }
+
+/* ---- the surface: rail + main ------------------------------------------- */
+
+/* Structural in every look. The Company group's five surfaces all ask "which
+   company?" first, and all five now answer it in the same place. */
+.vl-surface { flex-direction: row; align-items: flex-start; gap: var(--gutter); }
+.vl-railcol {
+  flex: 0 0 320px; align-self: flex-start;
+  position: sticky; top: 0; z-index: 5;
+  max-height: calc(100vh - var(--topbar-h) - var(--gutter) * 2);
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--gutter);
+}
+.vl-railcol > * { flex: 0 0 auto; }
+.vl-railcol .src-panel { margin: 0; }
+
+/* Below 1000px `.view.is-active` stacks the surface into a column, and a rail
+   that is still capped at a viewport height becomes a short scrolling box above
+   the content instead of part of the page. Management and Insider already
+   release their rails here; Valuation did not, and the company summary — which
+   made the rail several times taller — is what made it visible: the summary was
+   cut off mid-figure with no indication that anything had been clipped. */
+@media (max-width: 1000px) {
+  .vl-railcol {
+    flex: 0 0 auto; width: 100%; align-self: stretch;
+    position: static; max-height: none; overflow: visible;
+  }
+}
+.vl-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--gutter); }
+
+.vl-bars { display: flex; flex-direction: column; gap: 9px; padding: 4px 2px 2px; }
+.vl-bars-row {
+  display: grid; grid-template-columns: 168px minmax(0, 1fr) 92px 132px;
+  align-items: center; gap: 12px;
+}
+.vl-bars-label { font-size: 12px; color: var(--ink-soft); }
+.vl-bars-row.is-lead .vl-bars-label { color: var(--ink); font-weight: 600; }
+.vl-bars-track { height: 12px; background: var(--hairline-soft); border-radius: 2px; overflow: hidden; }
+/* ONE hue for both bars: this is a single measure at two readings, and two
+   colours would assert a categorical split that is not there. Which reading is
+   which is carried by the label; which one matters, by weight. */
+.vl-bars-fill { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.vl-bars-row:not(.is-lead) .vl-bars-fill { opacity: 0.45; }
+/* A contraction is a bar on the other side of nothing, not a missing bar. */
+.vl-bars-fill.is-neg { background: var(--down); }
+.vl-bars-val {
+  font-size: 20px; font-weight: 600; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.vl-bars-row:not(.is-lead) .vl-bars-val { font-size: 15px; color: var(--ink-soft); }
+.vl-bars-sub { font-size: 10.5px; color: var(--ink-fainter); }
+.vl-bars-read {
+  margin: 4px 0 0; font-size: 12px; line-height: 1.6; color: var(--ink-soft);
+  border-top: 1px solid var(--hairline-soft); padding-top: 8px;
+}
+.vl-bars-read b { color: var(--ink); font-weight: 600; }
+
+/* ---- 1 · VERDICT --------------------------------------------------------
+   The answer, at the size of an answer. Six equal tiles say that enterprise
+   value and implied growth are equally interesting; they are not — five of them
+   are the working, and the working belongs under the result. So the tiles lose
+   their boxes and become a rule-separated caption strip in the .chart-stats
+   idiom, and the two bars take the space that buys. */
+.vl-surface[data-vl-v="1"] .bk-strip {
+  display: flex; flex-wrap: wrap; gap: 0; background: none;
+  border-top: 1px solid var(--hairline-soft);
+  border-bottom: 1px solid var(--hairline-soft);
+  border-radius: 0; padding: 0;
+}
+.vl-surface[data-vl-v="1"] .bk-tile {
+  background: none; padding: 5px 16px 5px 0; margin-right: 16px;
+  border-right: 1px solid var(--hairline-soft);
+}
+.vl-surface[data-vl-v="1"] .bk-tile:last-child { border-right: 0; margin-right: 0; }
+.vl-surface[data-vl-v="1"] .bk-tile-value { font-size: 15px; }
+/* Implied growth is already the headline in the bars above; repeating it at
+   full size in the strip makes the reader check whether they differ. */
+.vl-surface[data-vl-v="1"] .bk-tile:first-child .bk-tile-value { color: var(--ink-soft); }
+
+/* ---- 2 · CONSOLE  (CHOSEN) ---------------------------------------------
+   The look that won, and the reason the rail is now structural rather than one
+   look's layout: five sliders whose whole point is that you move them and watch
+   a number change are useless below the fold. Everything that is an INPUT lives
+   in the rail; everything that is a RESULT lives beside it.
+
+   This block is nearly empty because the layout it used to describe is now the
+   surface's own. What is left is the one thing still specific to it. */
+.vl-surface[data-vl-v="2"] .vl-grid { font-size: 12px; }
+
+/* ---- 3 · LADDER ---------------------------------------------------------
+   Promotes the forwards run of the model. The scenario band goes full width and
+   first, because "what is it worth if it grows 15%" is the question people
+   actually arrive with, and the reverse-DCF answer is the more sophisticated
+   reply to it rather than the more natural one. */
+/* The bar and the flag keep the top; only the scenario band is promoted past
+   the strip and the panels. A bare `order:-1` on the band sent it above the
+   ticker input too, which is not "promoted", it is dislodged. */
+.vl-surface[data-vl-v="3"] .vl-main > :nth-child(1) { order: -3; }
+.vl-surface[data-vl-v="3"] .vl-main > :nth-child(2) { order: -2; }
+.vl-surface[data-vl-v="3"] .vl-main > :nth-child(7) { order: -1; flex-direction: column; }
+/* Scenarios lead, comparables follow underneath — both full width. The band is
+   normally two panels side by side; stacking is what buys the ladder the width
+   it needs, and the multiples panel is evidence for the same question, so it
+   stays rather than being hidden to make room. */
+.vl-surface[data-vl-v="3"] .vl-main > :nth-child(7) > .pnl:last-child { order: -1; }
+/* `.bk-band-2 > .pnl` is `flex: 1 1 50%`, which means half the BAND's cross
+   size once the band is a column — so each panel got half of an auto height and
+   clipped its own footnote. Stacked, they size to their content. */
+.vl-surface[data-vl-v="3"] .vl-main > :nth-child(7) > .pnl { flex: 0 0 auto; }
+
+.vl-ladder { padding: 10px 12px 2px; }
+.vl-ladder-rows { position: relative; display: flex; flex-direction: column; gap: 5px; }
+.vl-ladder-row {
+  display: grid; grid-template-columns: 108px minmax(0, 1fr) 74px 58px;
+  align-items: center; gap: 10px;
+}
+.vl-ladder-key { font-size: 11.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.vl-ladder-key span { color: var(--ink-fainter); }
+.vl-ladder-track { height: 13px; background: var(--hairline-soft); border-radius: 2px; }
+.vl-ladder-fill { display: block; height: 100%; border-radius: 2px; }
+/* Only the crossing is coloured. Length already carries the value; up/down here
+   is the CLAIM — cheap or dear against today's price — and that is the one
+   thing on the chart worth spending the reserved pair on. */
+.vl-ladder-fill.is-cheap { background: color-mix(in srgb, var(--up) 62%, transparent); }
+/* Dear is the unremarkable case, so it is neutral — but it still has to be a
+   readable bar. Mixed against --ink-faint rather than --ink-fainter, which at
+   55% of an already 0.28-alpha token was barely a tint. */
+.vl-ladder-fill.is-dear { background: color-mix(in srgb, var(--ink-faint) 75%, transparent); }
+.vl-ladder-val {
+  font-size: 12px; font-weight: 600; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.vl-ladder-up { font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+.vl-ladder-up.up { color: var(--up); }
+.vl-ladder-up.down { color: var(--down); }
+/* The price is one fact about the company, so it is one rule across every row
+   rather than a tick repeated per row. Offset by the key column's width plus
+   its gap, so `left` is measured inside the track and not inside the grid. */
+/* The price is one fact about the company, so it is one rule across every row
+   rather than a tick repeated per row.
+
+   `--p` arrives as a unitless 0..1 and the track's box is reconstructed here
+   from the grid template above: the track starts after the 108px key plus one
+   10px gap, and ends before the 74px and 58px figure columns plus their two
+   gaps — 280px of non-track in total. Positioning by percentage instead put the
+   rule at that fraction of the whole ROW, which is a different and much wider
+   box, and landed it out among the numbers. Keep the two in step if the grid
+   template changes. */
+.vl-ladder-rule {
+  position: absolute; top: 14px; bottom: 2px; z-index: 1; width: 0;
+  left: calc(118px + (100% - 280px) * var(--p, 0));
+  border-left: 1.5px dashed var(--accent); pointer-events: none;
+}
+.vl-ladder-rule-lbl {
+  /* Above the rule, not below it: below put the label on top of the longest
+     bar, which is the one it is there to be compared against. */
+  position: absolute; top: -15px; white-space: nowrap;
+  /* Centred on the rule, so a rule near the right edge does not push its own
+     label off the panel — which is exactly where today's price sits whenever
+     the model is anywhere near fair. */
+  left: 50%; transform: translateX(-50%);
+  font-size: 10px; font-weight: 600; color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 4 · COMPARE --------------------------------------------------------
+   Reframes the whole surface as one comparison rather than a stack of panels.
+   Left column: what the PRICE says — implied growth, the sensitivity grid, the
+   scenarios. Right column: what the COMPANY has done — trailing growth, its
+   cash flows, and where its multiple sits among comparables. The surface's
+   argument is that these two disagree; a layout that interleaves them makes the
+   reader do the sorting. */
+.vl-surface[data-vl-v="4"] .vl-main {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--gutter); align-content: start; grid-auto-rows: min-content;
+}
+.vl-surface[data-vl-v="4"] .vl-main > * { grid-column: 1 / -1; min-width: 0; }
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(6),
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(7) { display: contents; }
+/* Assumptions and multiples down the left, grid and scenarios down the right:
+   the model's inputs above the model's outputs, evidence above evidence. */
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(6) > .pnl:first-child { grid-column: 1; }
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(6) > .pnl:last-child { grid-column: 2; }
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(7) > .pnl:first-child { grid-column: 2; }
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(7) > .pnl:last-child { grid-column: 1; }
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(6) > .pnl,
+.vl-surface[data-vl-v="4"] .vl-main > :nth-child(7) > .pnl { margin-bottom: var(--gutter); }
+.vl-surface[data-vl-v="4"] .bk-strip { grid-template-columns: repeat(3, 1fr); }
+
+/* ---- 5 · REPORT ---------------------------------------------------------
+   The surface's output is a paragraph in a written note, and the note is what
+   survives the session. This look drops the dashboard costume: one measure
+   column, no panel shadows, no swatches, tables plain and rules hairline. It is
+   the worst of the five for fiddling with sliders and the best for reading what
+   you concluded, which is a real trade and not a styling preference. */
+.vl-surface[data-vl-v="5"] .vl-main {
+  max-width: 940px; --radius: 0px; --radius-sm: 0px;
+}
+/* Stacked, and each panel sized to its own content. `.bk-band-2 > .pnl` is
+   `flex: 1 1 50%`, which in a column means half the band's height — so the
+   shorter panel grew a pool of empty space to match the taller one. */
+.vl-surface[data-vl-v="5"] .bk-band { flex-direction: column; }
+.vl-surface[data-vl-v="5"] .bk-band > .pnl { flex: 0 0 auto; }
+.vl-surface[data-vl-v="5"] .pnl {
+  background: none; box-shadow: none;
+  border-top: 1px solid var(--hairline); border-radius: 0;
+}
+.vl-surface[data-vl-v="5"] .pnl-swatch { display: none; }
+.vl-surface[data-vl-v="5"] .pnl-head { height: auto; padding: 14px 0 4px; }
+.vl-surface[data-vl-v="5"] .pnl-title {
+  font-size: 0.95rem; font-weight: 600; letter-spacing: -0.015em; white-space: normal;
+}
+.vl-surface[data-vl-v="5"] .pnl-body { padding: 4px 0 14px; }
+.vl-surface[data-vl-v="5"] .bk-strip {
+  grid-template-columns: repeat(3, 1fr); background: none; gap: 0;
+  border-top: 1px solid var(--hairline);
+}
+.vl-surface[data-vl-v="5"] .bk-tile {
+  background: none; padding: 8px 14px 8px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+}
+.vl-surface[data-vl-v="5"] .bk-flag {
+  background: none; border-left: none; padding: 10px 0;
+  font-size: 15px; line-height: 1.6;
+}
+.vl-surface[data-vl-v="5"] .bk-foot, .vl-surface[data-vl-v="5"] .cr-note {
+  font-size: 12px; line-height: 1.7; max-width: 68ch;
+}
+.vl-surface[data-vl-v="5"] .bk-table tbody tr:hover td { background: none; }
+
+/* ---- assumptions: three sizes ------------------------------------------- */
+
+/* The picker sits in the panel header with the other per-panel controls. Three
+   words rather than three glyphs: a chevron says "collapse" and cannot say
+   "collapse to a summary", which is the state that earns this control. */
+.vl-detail button { padding: 2px 8px; font-size: 0.66rem; }
+
+/* The summary borrows .vl-slider wholesale, so label and value are already
+   pixel-identical to the full state. All that is left to say is the spacing:
+   without a 20px range input in every row the 13px gap reads as drift, and a
+   hairline gives the list the structure the tracks used to provide. */
+.vl-static { gap: 0; }
+/* One line per row now that the hints are gone, so the padding does the work
+   the slider tracks used to and the hairline carries the structure. */
+.vl-static .vl-slider {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+}
+.vl-static .vl-slider:first-child { padding-top: 1px; }
+.vl-static .vl-slider:last-child { padding-bottom: 1px; border-bottom: none; }
+/* Closed leaves the header and nothing else — the body would otherwise keep a
+   panel's worth of padding around no content. */
+.vl-railcol .pnl-body:empty { display: none; }

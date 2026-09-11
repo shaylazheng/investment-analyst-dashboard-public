@@ -12,3 +12,9 @@ build/
 .DS_Store
 # data is regenerable — record HOW in CLAUDE.md before ignoring it
 data/
+
+.Codex/
+.claude/
+CLAUDE.md
+STATUS.md
+worklog.md

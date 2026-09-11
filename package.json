@@ -1,0 +1,36 @@
+{
+  "name": "investment-analyst-dashboard-public",
+  "version": "1.0.0",
+  "description": "Company research dashboard powered entirely by generated data",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node demo/server.js",
+    "dev": "vite",
+    "build": "vite build && node demo/export.js",
+    "test": "node --test demo/*.test.js",
+    "test:math": "node --test packages/core/lib/*.test.js",
+    "test:browser": "node demo/browser-check.mjs"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "d3": "^7.9.0",
+    "express": "^4.19.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.0.5",
+    "playwright": "^1.63.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.2.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

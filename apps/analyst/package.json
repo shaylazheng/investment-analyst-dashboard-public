@@ -1,0 +1,23 @@
+{
+  "name": "@markets/analyst-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The connective layer: mounts every section's routes and composes their views into one dashboard.",
+  "exports": {
+    "./*": "./*"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@markets/core": "*",
+    "@markets/shell": "*",
+    "@markets/summary": "*",
+    "@markets/management": "*",
+    "@markets/industry": "*",
+    "@markets/competitors": "*",
+    "@markets/valuation": "*",
+    "@markets/graph": "*",
+    "@markets/outlook": "*",
+    "@markets/insider": "*"
+  }
+}

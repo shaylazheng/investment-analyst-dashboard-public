@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self' data:">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investment Analyst Dashboard</title>
+  
+  
+  
+  <script>
+    // Theme and look are stamped before first paint so there is no flash.
+    (function () {
+      var q = new URLSearchParams(location.search), r = document.documentElement;
+      r.setAttribute('data-theme', q.get('theme') || localStorage.getItem('theme') || 'dark');
+      r.setAttribute('data-booting', '');
+    })();
+  </script>
+  <!--
+    The boot cover's CSS is INLINE and its tokens are literals, both on purpose.
+
+    In a production build Vite emits a blocking <link> for base.css, so the
+    palette would be there in time; in dev the stylesheet is injected by
+    JavaScript, which is precisely the window this cover exists to fill. A
+    var(--bg) here would resolve to nothing on exactly the load it matters most.
+    So the four colours it needs are written out for both themes, and
+    bloom.css remains the authority for everything after the cover lifts.
+  -->
+  <style>#boot{z-index:9999;color:#e6edf3;background:#0d1117;flex-direction:column;justify-content:center;align-items:center;gap:16px;padding:24px;font-family:IBM Plex Sans,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;transition:opacity .26s;display:flex;position:fixed;inset:0}:root[data-theme=light] #boot{color:#1f2328;background:#f6f8fa}#boot.is-going{opacity:0;pointer-events:none}:root[data-booting] body{overflow:hidden}#boot-mark{border:2px solid #7f8ca047;border-top-color:#4c8eff;border-radius:50%;width:24px;height:24px;animation:.72s linear infinite boot-spin}#boot-title{font-size:13px;font-weight:600}#boot-note{color:#8b949e;font-variant-numeric:tabular-nums;text-align:center;min-height:1.2em;font-size:11px}:root[data-theme=light] #boot-note{color:#656d76}#boot-track{background:#7f8ca033;border-radius:999px;width:236px;height:3px;overflow:hidden}#boot-bar{background:#4c8eff;border-radius:999px;height:100%}#boot-bar[data-mode=determinate]{width:var(--p,6%);transition:width .22s}#boot-bar[data-mode=indeterminate]{width:38%;animation:1.15s ease-in-out infinite boot-sweep}#boot-skip{font:inherit;cursor:pointer;color:#8b949e;background:0 0;border:1px solid #7f8ca04d;border-radius:6px;padding:4px 11px;font-size:11px}#boot-skip:hover{color:#e6edf3;border-color:#4c8eff}:root[data-theme=light] #boot-skip:hover{color:#1f2328}#boot-fallback{color:#8b949e;text-align:center;max-width:36ch;font-size:11px;line-height:1.55;display:none}#boot-fallback code{font-family:IBM Plex Mono,ui-monospace,monospace}@keyframes boot-spin{to{transform:rotate(360deg)}}@keyframes boot-sweep{0%{margin-left:-38%}to{margin-left:100%}}@media (prefers-reduced-motion:reduce){#boot{transition:none}#boot-mark{border-top-color:#7f8ca047;animation:none}#boot-bar[data-mode=indeterminate]{opacity:.4;width:100%;animation:none}}</style>
+  <script type="module" crossorigin src="./assets/index-C884hfH0.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-yDY4U07h.css">
+</head>
+<body>
+  <!--
+    Painted with the first frame, before the ~620KB bundle parses. Deliberately
+    not a React component — see the header of web/src/lib/boot.js, which is its
+    only driver.
+  -->
+  <div id="boot" role="status" aria-live="polite">
+    <div id="boot-mark"></div>
+    <div id="boot-title">Markets Platform</div>
+    <div id="boot-track"><div id="boot-bar" data-mode="indeterminate"></div></div>
+    <div id="boot-note">starting…</div>
+    <button type="button" id="boot-skip" hidden>Show me anyway</button>
+    <noscript><div style="font-size:11px;color:#8b949e">This dashboard needs JavaScript.</div></noscript>
+    <div id="boot-fallback">
+      The app bundle hasn’t loaded. Check that the gateway is running
+      (<code>npm start</code>), then reload.
+    </div>
+  </div>
+  <div id="root"></div>
+  <script>
+    // Name the surface from the hash immediately, so the very first frame says
+    // what it is waiting for instead of spinning anonymously. The labels are
+    // duplicated from SURFACE_LABEL in lib/boot.js because that module has not
+    // parsed yet — which is the entire point of this block.
+    (function () {
+      var L = { markets: 'Markets', calendar: 'Calendar', news: 'Newswire', learn: 'Learn',
+                graph: 'Company graph', insider: 'Insider screener', competitors: 'Competitors' };
+      var h = (location.hash || '').slice(1).split('&')[0];
+      var n = document.getElementById('boot-note');
+      if (n) n.textContent = (L[h] || 'Markets') + ' · starting…';
+
+      // If the module never executes at all — bundle 404, syntax error, gateway
+      // down — nothing would ever take this cover down and it would sit there
+      // claiming to load forever. Say what actually went wrong instead.
+      setTimeout(function () {
+        if (!document.getElementById('boot')) return;
+        var f = document.getElementById('boot-fallback');
+        var m = document.getElementById('boot-mark');
+        var b = document.getElementById('boot-bar');
+        var s = document.getElementById('boot-skip');
+        if (f) f.style.display = 'block';
+        if (m) m.style.animation = 'none';
+        if (b) b.style.animation = 'none';
+        if (s) s.hidden = false;
+      }, 12000);
+    })();
+  </script>
+</body>
+</html>
